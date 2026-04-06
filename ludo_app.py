@@ -12,25 +12,25 @@ from ludo_engine import COLORS_BY_COUNT, COLOR_LABELS, LudoGame
 PAGE_CSS = """
 <style>
     :root {
-        --ink: #2c231a;
-        --panel: rgba(255, 249, 239, 0.93);
-        --panel-strong: rgba(255, 252, 246, 0.97);
-        --line: rgba(74, 52, 29, 0.12);
-        --shadow: rgba(70, 44, 21, 0.12);
-        --red: #d6524f;
-        --green: #34905c;
-        --yellow: #bf9631;
-        --blue: #3f77c6;
-        --info: #58708c;
-        --success: #3c7b54;
-        --warning: #b07f26;
-        --error: #9c4a42;
+        --ink: #2e241a;
+        --line: rgba(72, 48, 24, 0.12);
+        --shadow: rgba(56, 34, 16, 0.12);
+        --panel-top: rgba(255, 252, 246, 0.98);
+        --panel-bottom: rgba(245, 232, 212, 0.94);
+        --red: #d7524c;
+        --green: #30955f;
+        --yellow: #c79b32;
+        --blue: #477ed0;
+        --info: #57708a;
+        --success: #3c7c54;
+        --warning: #b4842d;
+        --error: #984941;
     }
     .stApp {
         background:
-            radial-gradient(circle at top left, rgba(214, 130, 79, 0.16), transparent 32%),
-            radial-gradient(circle at bottom right, rgba(85, 160, 120, 0.14), transparent 30%),
-            linear-gradient(180deg, #f7f0e3, #eee1cb 100%);
+            radial-gradient(circle at top left, rgba(212, 127, 76, 0.15), transparent 32%),
+            radial-gradient(circle at bottom right, rgba(76, 145, 112, 0.12), transparent 32%),
+            linear-gradient(180deg, #f7f0e3 0%, #eddfc7 100%);
         color: var(--ink);
         font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     }
@@ -43,48 +43,47 @@ PAGE_CSS = """
         display: none;
     }
     .block-container {
-        padding-top: 0.45rem;
+        max-width: 1680px;
+        padding-top: 0.55rem;
         padding-bottom: 0.6rem;
-        max-width: 1600px;
     }
     [data-testid="stHorizontalBlock"] {
         align-items: start;
     }
     .side-card {
-        border: 1px solid rgba(44, 35, 26, 0.08);
+        border: 1px solid rgba(46, 36, 26, 0.08);
         border-radius: 22px;
-        background: linear-gradient(135deg, rgba(255, 252, 246, 0.96), rgba(246, 234, 214, 0.92));
-        box-shadow: 0 18px 38px var(--shadow);
+        background: linear-gradient(180deg, var(--panel-top), var(--panel-bottom));
+        box-shadow: 0 16px 36px var(--shadow);
         padding: 1rem 1.05rem;
-        margin-bottom: 0.75rem;
-    }
-    .title-card h1 {
-        margin: 0;
-        font-size: clamp(1.9rem, 2.6vw, 2.7rem);
-        line-height: 1.02;
-        letter-spacing: 0.01em;
+        margin-bottom: 0.78rem;
     }
     .title-kicker,
     .card-label {
         text-transform: uppercase;
         letter-spacing: 0.12em;
         font-size: 0.74rem;
-        color: rgba(70, 50, 29, 0.72);
-        margin-bottom: 0.3rem;
+        color: rgba(64, 47, 31, 0.7);
+        margin-bottom: 0.28rem;
+    }
+    .title-card h1 {
+        margin: 0;
+        font-size: clamp(1.95rem, 2.7vw, 2.8rem);
+        line-height: 1.02;
     }
     .title-card p,
     .mini-note {
-        margin: 0.38rem 0 0;
-        color: rgba(44, 35, 26, 0.72);
-        font-size: 0.94rem;
+        margin: 0.36rem 0 0;
+        color: rgba(46, 36, 26, 0.72);
+        font-size: 0.95rem;
         line-height: 1.38;
     }
     .status-text {
         font-size: 1.08rem;
         font-weight: 700;
-        line-height: 1.3;
-        color: #402d1a;
-        margin-bottom: 0.65rem;
+        line-height: 1.28;
+        color: #3f2d1c;
+        margin-bottom: 0.62rem;
     }
     .meta-grid {
         display: grid;
@@ -93,7 +92,7 @@ PAGE_CSS = """
     }
     .meta-item {
         border: 1px solid var(--line);
-        background: var(--panel-strong);
+        background: rgba(255, 255, 255, 0.7);
         border-radius: 15px;
         padding: 0.6rem 0.72rem;
     }
@@ -102,7 +101,7 @@ PAGE_CSS = """
         font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: rgba(70, 50, 29, 0.62);
+        color: rgba(64, 47, 31, 0.6);
         margin-bottom: 0.16rem;
     }
     .meta-item strong {
@@ -110,37 +109,37 @@ PAGE_CSS = """
         font-size: 0.98rem;
     }
     .dice-card {
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.6);
-        padding: 0.8rem 0.9rem;
         text-align: center;
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.64);
+        padding: 0.85rem 0.9rem;
         margin-bottom: 0.75rem;
     }
     .dice-label {
         text-transform: uppercase;
-        letter-spacing: 0.11em;
+        letter-spacing: 0.1em;
         font-size: 0.72rem;
-        color: rgba(70, 50, 29, 0.66);
+        color: rgba(64, 47, 31, 0.64);
     }
     .dice-value {
-        font-size: 2.8rem;
+        font-size: 2.95rem;
         line-height: 1;
-        font-weight: 800;
-        margin: 0.35rem 0 0.15rem;
-        color: #442d18;
+        font-weight: 900;
+        margin: 0.34rem 0 0.18rem;
+        color: #432d1b;
     }
     .dice-subtext {
         font-size: 0.9rem;
-        color: rgba(44, 35, 26, 0.72);
+        color: rgba(46, 36, 26, 0.72);
     }
     .notice-card {
         border-radius: 18px;
         padding: 0.82rem 0.95rem;
         border: 1px solid var(--line);
-        background: var(--panel-strong);
-        box-shadow: 0 14px 28px rgba(88, 60, 32, 0.06);
-        margin-bottom: 0.75rem;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 12px 24px rgba(88, 60, 32, 0.06);
+        margin-bottom: 0.78rem;
     }
     .notice-card.info { border-left: 5px solid var(--info); }
     .notice-card.success { border-left: 5px solid var(--success); }
@@ -152,7 +151,7 @@ PAGE_CSS = """
         font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        color: rgba(70, 50, 29, 0.75);
+        color: rgba(64, 47, 31, 0.74);
     }
     .notice-card p {
         margin: 0;
@@ -160,11 +159,11 @@ PAGE_CSS = """
         line-height: 1.35;
     }
     div.stButton > button {
-        min-height: 2.75rem;
+        min-height: 2.8rem;
         border-radius: 15px;
         font-weight: 700;
-        background: linear-gradient(180deg, #fff9f0, #ecd9b8);
-        color: #3d2917;
+        background: linear-gradient(180deg, #fffaf1, #ecd9b8);
+        color: #3c2816;
         border: 1px solid rgba(92, 62, 34, 0.22);
         box-shadow:
             0 10px 18px rgba(92, 62, 34, 0.1),
@@ -177,8 +176,8 @@ PAGE_CSS = """
         transform: translateY(-1px);
     }
     div.stButton > button[kind="primary"] {
-        background: linear-gradient(180deg, #c67e3b, #965724);
-        color: #fff9f4;
+        background: linear-gradient(180deg, #c97f3e, #985a26);
+        color: #fff8f1;
         border-color: rgba(88, 48, 20, 0.38);
         box-shadow:
             0 12px 22px rgba(96, 57, 27, 0.18),
@@ -192,16 +191,26 @@ PAGE_CSS = """
         border-color: rgba(92, 62, 34, 0.12);
         cursor: not-allowed;
     }
+    .section-note {
+        border: 1px dashed rgba(74, 52, 29, 0.18);
+        border-radius: 14px;
+        padding: 0.72rem 0.8rem;
+        background: rgba(255, 255, 255, 0.46);
+        color: rgba(46, 36, 26, 0.76);
+        font-size: 0.89rem;
+        line-height: 1.35;
+        margin-bottom: 0.75rem;
+    }
     .player-card {
         border-radius: 18px;
         padding: 0.82rem 0.9rem;
-        margin-bottom: 0.6rem;
+        margin-bottom: 0.58rem;
         border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.64);
-        box-shadow: 0 12px 24px rgba(88, 60, 32, 0.05);
+        background: rgba(255, 255, 255, 0.66);
+        box-shadow: 0 12px 22px rgba(88, 60, 32, 0.05);
     }
     .player-card.current {
-        box-shadow: 0 0 0 2px rgba(215, 162, 82, 0.26), 0 14px 28px rgba(88, 60, 32, 0.08);
+        box-shadow: 0 0 0 2px rgba(216, 165, 84, 0.26), 0 14px 26px rgba(88, 60, 32, 0.08);
     }
     .player-card.red { border-left: 5px solid var(--red); }
     .player-card.green { border-left: 5px solid var(--green); }
@@ -220,19 +229,18 @@ PAGE_CSS = """
     .player-title span {
         font-size: 0.78rem;
         text-transform: uppercase;
-        letter-spacing: 0.09em;
-        color: rgba(70, 50, 29, 0.65);
+        letter-spacing: 0.08em;
+        color: rgba(64, 47, 31, 0.66);
     }
     .player-metrics {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 0.45rem;
-        margin-top: 0.45rem;
     }
     .player-metrics div {
         border-radius: 12px;
         padding: 0.48rem 0.55rem;
-        background: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.74);
         border: 1px solid rgba(74, 52, 29, 0.08);
     }
     .player-metrics span {
@@ -240,7 +248,7 @@ PAGE_CSS = """
         font-size: 0.68rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: rgba(70, 50, 29, 0.58);
+        color: rgba(64, 47, 31, 0.58);
         margin-bottom: 0.12rem;
     }
     .player-metrics strong {
@@ -251,24 +259,15 @@ PAGE_CSS = """
         margin: 0;
         padding: 0.82rem 0.9rem;
         border-radius: 16px;
-        background: #241912;
+        background: #221811;
         color: #f4eadb;
         font-family: Consolas, "Courier New", monospace;
         font-size: 0.86rem;
         line-height: 1.45;
-        max-height: 225px;
+        max-height: 232px;
         overflow-y: auto;
         white-space: pre-wrap;
         border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .mode-note {
-        border: 1px dashed rgba(74, 52, 29, 0.18);
-        border-radius: 14px;
-        padding: 0.72rem 0.8rem;
-        background: rgba(255, 255, 255, 0.45);
-        color: rgba(44, 35, 26, 0.76);
-        font-size: 0.88rem;
-        line-height: 1.35;
     }
 </style>
 """
@@ -296,7 +295,7 @@ def ensure_state() -> None:
     if "notice" not in st.session_state:
         st.session_state.notice = (
             "info",
-            "Roll the die to begin. When a token can move, it glows on the board.",
+            "Roll the die to begin. When a move is possible, the valid token lights up on the board.",
         )
 
 
@@ -315,10 +314,10 @@ def set_notice(level: str, message: str) -> None:
 
 def mode_caption(player_count: int) -> str:
     if player_count == 2:
-        return "Two-player mode uses Red and Yellow, which sit on opposite corners of the board."
+        return "Two-player mode uses Red and Yellow on opposite corners."
     if player_count == 3:
         return "Three-player mode uses Red, Green, and Yellow."
-    return "Four-player mode fills the full classic board."
+    return "Four-player mode uses all four colors."
 
 
 def notice_markup(level: str, message: str) -> str:
@@ -348,7 +347,6 @@ def serialize_board_state(game: LudoGame) -> dict[str, object]:
                     "id": token.id,
                     "label": str(token.number + 1),
                     "color": player.color,
-                    "player_name": player.name,
                     "movable": token.id in movable_tokens,
                     "last_moved": game.last_move is not None and game.last_move.token_id == token.id,
                 }
@@ -361,7 +359,6 @@ def serialize_board_state(game: LudoGame) -> dict[str, object]:
     return {
         "placements": ordered_placements,
         "active_colors": [player.color for player in game.players],
-        "player_names": {player.color: player.name for player in game.players},
         "current_color": None if game.game_over else game.current_player.color,
     }
 
@@ -402,32 +399,20 @@ def history_text(game: LudoGame) -> str:
 
 
 def run_app() -> None:
-    st.set_page_config(page_title="Offline Ludo", page_icon="L", layout="wide")
+    st.set_page_config(page_title="Classic Ludo", page_icon="L", layout="wide")
     ensure_state()
 
     game: LudoGame = st.session_state.game
     st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-    notice_level, notice_message = st.session_state.notice
-    board_col, side_col = st.columns([1.78, 0.92], gap="large")
+    left_col, right_col = st.columns([1.34, 0.88], gap="large")
     board_event: dict[str, object] | None = None
 
-    with board_col:
-        st.markdown(
-            """
-            <div class="side-card title-card">
-                <div class="title-kicker">Offline Streamlit Board Game</div>
-                <h1>Classic Ludo</h1>
-                <p>The board is rendered with a custom HTML/CSS/JS component while all dice and turn logic stay in Python.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown("<div class='mini-note'>Roll from the panel on the right. When a move is available, the board highlights the legal token or tokens for you to click.</div>", unsafe_allow_html=True)
+    with left_col:
         board_event = render_ludo_board(
             serialize_board_state(game),
-            key="main_ludo_board",
-            height=780,
+            key="classic_ludo_board",
+            height=840,
         )
 
     if board_event is not None:
@@ -439,7 +424,20 @@ def run_app() -> None:
                 set_notice("success" if success else "warning", message)
             st.rerun()
 
-    with side_col:
+    notice_level, notice_message = st.session_state.notice
+
+    with right_col:
+        st.markdown(
+            """
+            <div class="side-card title-card">
+                <div class="title-kicker">Offline Local Multiplayer</div>
+                <h1>Classic Ludo</h1>
+                <p>This build keeps the board on the left and moves all titles, status, setup, and match details into the right-hand control rail.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         st.markdown(
             f"""
             <div class="side-card">
@@ -469,7 +467,6 @@ def run_app() -> None:
         )
         st.markdown(notice_markup(notice_level, notice_message), unsafe_allow_html=True)
 
-    with side_col:
         last_roll_display = game.active_roll if game.active_roll is not None else game.last_roll
         st.markdown(
             f"""
@@ -495,21 +492,19 @@ def run_app() -> None:
             set_notice("info", "Fresh match ready. Roll to start the opening turn.")
             st.rerun()
 
-        st.markdown("<div class='mini-note'>Use the setup fields below when you want to switch between 2, 3, and 4 local players or change the displayed names.</div>", unsafe_allow_html=True)
-
         st.markdown(
             """
             <div class="side-card">
                 <div class="card-label">Match Setup</div>
                 <div class="mini-note" style="margin:0;">
-                    Change the player count or names here, then launch a fresh match with the updated setup.
+                    Change the player count or names here, then start a fresh standalone match.
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
+        st.markdown(f"<div class='section-note'>{escape(mode_caption(st.session_state.player_count))}</div>", unsafe_allow_html=True)
         st.selectbox("Players", [2, 3, 4], key="player_count", format_func=lambda value: f"{value} players")
-        st.markdown(f"<div class='mode-note'>{escape(mode_caption(st.session_state.player_count))}</div>", unsafe_allow_html=True)
         for color in COLORS_BY_COUNT[st.session_state.player_count]:
             st.text_input(f"{COLOR_LABELS[color]} player", key=f"setup_name_{color}")
         if st.button("Apply Setup To New Match", use_container_width=True):
@@ -523,20 +518,19 @@ def run_app() -> None:
             <div class="side-card">
                 <div class="card-label">Quick Rules</div>
                 <div class="mini-note" style="margin:0;">
-                    Roll a 6 to leave the yard. Exact rolls are required to reach home. Landing on an opponent outside a safe star sends that token back to its yard. A 6, a capture, or reaching home grants another roll.
+                    Roll a 6 to leave the yard. Exact rolls are required to reach home. Capturing an opponent outside a safe square sends that token back to its yard. A 6, a capture, or reaching home grants another roll.
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    with side_col:
         st.markdown(
             """
             <div class="side-card">
                 <div class="card-label">Players</div>
                 <div class="mini-note" style="margin:0;">
-                    Yard counts waiting tokens, board counts active tokens, and home counts finished ones.
+                    Yard counts waiting tokens, board counts active ones, and home counts finished tokens.
                 </div>
             </div>
             """,
