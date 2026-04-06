@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline Ludo Board</title>
+    <style>
+      :root {
+        --page: rgba(255, 251, 244, 0.92);
+        --frame-1: #b98143;
+        --frame-2: #815227;
+        --frame-3: #4d3017;
+        --panel: #f7f0e4;
+        --track: #fffdf7;
+        --track-edge: rgba(88, 54, 28, 0.14);
+        --shadow: rgba(48, 28, 12, 0.22);
+        --text: #2f2217;
+        --muted: rgba(47, 34, 23, 0.66);
+        --red: #e85b56;
+        --green: #3fa86c;
+        --yellow: #f1c64f;
+        --blue: #4a86d9;
+        --red-soft: #f9d3d0;
+        --green-soft: #d5f1e0;
+        --yellow-soft: #fdecb6;
+        --blue-soft: #d7e7ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        color: var(--text);
+      }
+
+      body {
+        padding: 2px;
+      }
+
+      button {
+        font: inherit;
+      }
+
+      .stage {
+        width: min(100%, 820px);
+        margin: 0 auto;
+      }
+
+      .frame {
+        position: relative;
+        padding: 16px;
+        border-radius: 34px;
+        background:
+          radial-gradient(circle at top left, rgba(255, 255, 255, 0.28), transparent 28%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 45%),
+          linear-gradient(145deg, var(--frame-1), #a66a33 18%, var(--frame-2) 52%, var(--frame-3));
+        box-shadow:
+          0 28px 48px var(--shadow),
+          inset 0 1px 0 rgba(255, 255, 255, 0.18),
+          inset 0 -12px 18px rgba(28, 16, 7, 0.24);
+      }
+
+      .frame::before {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border-radius: 26px;
+        border: 1px solid rgba(255, 246, 233, 0.22);
+        pointer-events: none;
+      }
+
+      .board-shell {
+        position: relative;
+        overflow: hidden;
+        padding: 12px;
+        border-radius: 26px;
+        background:
+          radial-gradient(circle at top, rgba(255, 255, 255, 0.14), transparent 35%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 24%),
+          linear-gradient(180deg, #f6ecdc, #eadcc4 100%);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.36),
+          inset 0 -12px 18px rgba(101, 69, 38, 0.12);
+      }
+
+      .board-grid {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(15, minmax(0, 1fr));
+        gap: 4px;
+        padding: 10px;
+        aspect-ratio: 1 / 1;
+        border-radius: 22px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 22%),
+          linear-gradient(180deg, #c99b63, #8d5d33);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.2),
+          inset 0 -10px 14px rgba(43, 25, 11, 0.18);
+      }
+
+      .cell {
+        position: relative;
+        min-width: 0;
+        aspect-ratio: 1 / 1;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.18),
+          inset 0 -6px 10px rgba(52, 30, 12, 0.08);
+      }
+
+      .cell.home {
+        opacity: 1;
+      }
+
+      .cell.home.red { background: linear-gradient(180deg, #f6b7b4, #ef7e78); }
+      .cell.home.green { background: linear-gradient(180deg, #b6e9ca, #59c080); }
+      .cell.home.yellow { background: linear-gradient(180deg, #fce8a1, #f4c94f); }
+      .cell.home.blue { background: linear-gradient(180deg, #bcd8ff, #659be5); }
+      .cell.home.inactive { filter: saturate(0.42) brightness(0.92); }
+
+      .cell.track,
+      .cell.yard-slot,
+      .cell.avenue,
+      .cell.finish {
+        background: linear-gradient(180deg, #fffef9, var(--track));
+        border: 1px solid var(--track-edge);
+      }
+
+      .cell.track.safe::before,
+      .cell.track.start::before,
+      .cell.track.entry::before {
+        content: "";
+        position: absolute;
+        inset: 18%;
+        border-radius: 999px;
+        opacity: 0.92;
+      }
+
+      .cell.track.safe::before {
+        background: radial-gradient(circle, rgba(120, 95, 53, 0.86), rgba(120, 95, 53, 0.2));
+      }
+
+      .cell.track.red.start::before,
+      .cell.track.red.entry::before { background: radial-gradient(circle, rgba(232, 91, 86, 0.95), rgba(232, 91, 86, 0.24)); }
+      .cell.track.green.start::before,
+      .cell.track.green.entry::before { background: radial-gradient(circle, rgba(63, 168, 108, 0.95), rgba(63, 168, 108, 0.24)); }
+      .cell.track.yellow.start::before,
+      .cell.track.yellow.entry::before { background: radial-gradient(circle, rgba(241, 198, 79, 0.95), rgba(241, 198, 79, 0.24)); }
+      .cell.track.blue.start::before,
+      .cell.track.blue.entry::before { background: radial-gradient(circle, rgba(74, 134, 217, 0.95), rgba(74, 134, 217, 0.24)); }
+
+      .cell.lane.red { background: linear-gradient(180deg, #fee7e6, var(--red-soft)); border: 1px solid rgba(232, 91, 86, 0.22); }
+      .cell.lane.green { background: linear-gradient(180deg, #edfdf4, var(--green-soft)); border: 1px solid rgba(63, 168, 108, 0.22); }
+      .cell.lane.yellow { background: linear-gradient(180deg, #fff9df, var(--yellow-soft)); border: 1px solid rgba(209, 157, 17, 0.22); }
+      .cell.lane.blue { background: linear-gradient(180deg, #eef5ff, var(--blue-soft)); border: 1px solid rgba(74, 134, 217, 0.22); }
+
+      .cell.finish.red { background: linear-gradient(180deg, #ffd7d4, #f6a5a0); }
+      .cell.finish.green { background: linear-gradient(180deg, #daf8e5, #8bd0a7); }
+      .cell.finish.yellow { background: linear-gradient(180deg, #fff0be, #f2cf65); }
+      .cell.finish.blue { background: linear-gradient(180deg, #dbeaff, #92b9f2); }
+
+      .cell.center-core {
+        background: conic-gradient(
+          from 225deg,
+          rgba(232, 91, 86, 0.92) 0deg 90deg,
+          rgba(63, 168, 108, 0.92) 90deg 180deg,
+          rgba(241, 198, 79, 0.92) 180deg 270deg,
+          rgba(74, 134, 217, 0.92) 270deg 360deg
+        );
+        border: 1px solid rgba(85, 56, 29, 0.18);
+      }
+
+      .cell.center-arm {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(250, 245, 236, 0.95));
+        border: 1px solid rgba(85, 56, 29, 0.12);
+      }
+
+      .cell.blank {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .cell.yard-slot::before {
+        content: "";
+        position: absolute;
+        inset: 20%;
+        border-radius: 999px;
+        border: 2px dashed rgba(110, 74, 40, 0.18);
+      }
+
+      .home-tag {
+        position: absolute;
+        z-index: 4;
+        padding: 0.38rem 0.7rem;
+        border-radius: 999px;
+        font-size: clamp(0.64rem, 1vw, 0.78rem);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: #fffdf9;
+        box-shadow: 0 12px 20px rgba(40, 23, 11, 0.14);
+        backdrop-filter: blur(3px);
+      }
+
+      .home-tag.red { background: rgba(201, 61, 55, 0.88); top: 18px; left: 18px; }
+      .home-tag.green { background: rgba(39, 131, 81, 0.9); top: 18px; right: 18px; }
+      .home-tag.yellow { background: rgba(202, 154, 26, 0.92); right: 18px; bottom: 18px; color: #4b3513; }
+      .home-tag.blue { background: rgba(50, 104, 187, 0.9); left: 18px; bottom: 18px; }
+      .home-tag.inactive { opacity: 0.42; filter: grayscale(0.25); }
+      .home-tag.current {
+        transform: translateY(-1px);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3), 0 14px 24px rgba(40, 23, 11, 0.2);
+      }
+
+      .token-stack {
+        position: relative;
+        z-index: 1;
+        width: 88%;
+        display: grid;
+        gap: 4px;
+      }
+
+      .token-stack.count-1 {
+        width: 64%;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .token-stack.count-2,
+      .token-stack.count-3,
+      .token-stack.count-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .token {
+        position: relative;
+        border: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: 999px;
+        font-size: clamp(0.68rem, 1vw, 0.86rem);
+        font-weight: 900;
+        line-height: 1;
+        cursor: default;
+        box-shadow:
+          0 8px 14px rgba(39, 23, 10, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.42),
+          inset 0 -5px 8px rgba(22, 13, 6, 0.15);
+        transition:
+          transform 120ms ease,
+          box-shadow 120ms ease,
+          filter 120ms ease;
+      }
+
+      .token.red { background: radial-gradient(circle at 35% 28%, #fff7f7, #f07a73 42%, #cc443d 100%); color: #5b1512; }
+      .token.green { background: radial-gradient(circle at 35% 28%, #f5fff9, #67c58e 42%, #2f9158 100%); color: #123f24; }
+      .token.yellow { background: radial-gradient(circle at 35% 28%, #fffef3, #f6d766 42%, #d0a62d 100%); color: #5c440b; }
+      .token.blue { background: radial-gradient(circle at 35% 28%, #f6fbff, #73a5ec 42%, #3d76c5 100%); color: #102f5b; }
+
+      .token.movable {
+        cursor: pointer;
+        box-shadow:
+          0 0 0 3px rgba(255, 255, 255, 0.55),
+          0 0 0 7px rgba(255, 224, 129, 0.52),
+          0 14px 22px rgba(39, 23, 10, 0.24),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5),
+          inset 0 -5px 8px rgba(22, 13, 6, 0.15);
+        animation: pulse 1.4s ease-in-out infinite;
+      }
+
+      .token.movable:hover {
+        transform: translateY(-1px) scale(1.05);
+        filter: brightness(1.04);
+      }
+
+      .token.last-moved::after {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        border-radius: 999px;
+        border: 2px solid rgba(33, 25, 18, 0.72);
+      }
+
+      .token:disabled {
+        opacity: 1;
+      }
+
+      .center-mark {
+        font-size: clamp(0.72rem, 1vw, 0.9rem);
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        color: rgba(255, 255, 255, 0.92);
+        text-shadow: 0 2px 8px rgba(40, 22, 9, 0.28);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.06);
+        }
+      }
+
+      @media (max-width: 720px) {
+        .frame {
+          padding: 10px;
+          border-radius: 24px;
+        }
+
+        .board-shell {
+          padding: 8px;
+          border-radius: 18px;
+        }
+
+        .board-grid {
+          gap: 3px;
+          padding: 8px;
+          border-radius: 16px;
+        }
+
+        .cell {
+          border-radius: 9px;
+        }
+
+        .home-tag {
+          padding: 0.28rem 0.54rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script>
+      const TRACK = [
+        [6, 1], [6, 2], [6, 3], [6, 4], [6, 5],
+        [5, 6], [4, 6], [3, 6], [2, 6], [1, 6], [0, 6], [0, 7], [0, 8],
+        [1, 8], [2, 8], [3, 8], [4, 8], [5, 8],
+        [6, 9], [6, 10], [6, 11], [6, 12], [6, 13], [6, 14], [7, 14], [8, 14],
+        [8, 13], [8, 12], [8, 11], [8, 10], [8, 9],
+        [9, 8], [10, 8], [11, 8], [12, 8], [13, 8], [14, 8], [14, 7], [14, 6],
+        [13, 6], [12, 6], [11, 6], [10, 6], [9, 6],
+        [8, 5], [8, 4], [8, 3], [8, 2], [8, 1], [8, 0], [7, 0], [6, 0],
+      ];
+
+      const LANES = {
+        red: [[7, 1], [7, 2], [7, 3], [7, 4], [7, 5]],
+        green: [[1, 7], [2, 7], [3, 7], [4, 7], [5, 7]],
+        yellow: [[7, 13], [7, 12], [7, 11], [7, 10], [7, 9]],
+        blue: [[13, 7], [12, 7], [11, 7], [10, 7], [9, 7]],
+      };
+
+      const YARDS = {
+        red: [[2, 2], [2, 4], [4, 2], [4, 4]],
+        green: [[2, 10], [2, 12], [4, 10], [4, 12]],
+        yellow: [[10, 10], [10, 12], [12, 10], [12, 12]],
+        blue: [[10, 2], [10, 4], [12, 2], [12, 4]],
+      };
+
+      const FINISH = {
+        red: [6, 6],
+        green: [6, 8],
+        yellow: [8, 8],
+        blue: [8, 6],
+      };
+
+      const START_TRACK_INDEX = { red: 0, green: 13, yellow: 26, blue: 39 };
+      const ENTRY_TRACK_INDEX = { red: 50, green: 11, yellow: 24, blue: 37 };
+      const SAFE_TRACK_INDICES = new Set([0, 8, 13, 21, 26, 34, 39, 47]);
+
+      const currentState = { placements: {}, active_colors: [], player_names: {} };
+      let clickCounter = 0;
+
+      function keyOf(row, col) {
+        return `${row}-${col}`;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      const trackLookup = new Map();
+      TRACK.forEach(([row, col], index) => {
+        trackLookup.set(keyOf(row, col), index);
+      });
+
+      const laneLookup = new Map();
+      Object.entries(LANES).forEach(([color, cells]) => {
+        cells.forEach(([row, col], index) => {
+          laneLookup.set(keyOf(row, col), { color, index });
+        });
+      });
+
+      const yardLookup = new Map();
+      Object.entries(YARDS).forEach(([color, cells]) => {
+        cells.forEach(([row, col], index) => {
+          yardLookup.set(keyOf(row, col), { color, index });
+        });
+      });
+
+      const finishLookup = new Map();
+      Object.entries(FINISH).forEach(([color, [row, col]]) => {
+        finishLookup.set(keyOf(row, col), color);
+      });
+
+      function sendMessage(type, payload = {}) {
+        window.parent.postMessage(
+          {
+            isStreamlitMessage: true,
+            type,
+            ...payload,
+          },
+          "*",
+        );
+      }
+
+      function setComponentReady() {
+        sendMessage("streamlit:componentReady", { apiVersion: 1 });
+      }
+
+      function setFrameHeight() {
+        const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+        sendMessage("streamlit:setFrameHeight", { height });
+      }
+
+      function setComponentValue(value) {
+        sendMessage("streamlit:setComponentValue", { value });
+      }
+
+      function emitTokenClick(tokenId) {
+        setComponentValue({
+          kind: "token",
+          token_id: tokenId,
+          event_id: `token-${++clickCounter}`,
+        });
+      }
+
+      function cornerColor(row, col) {
+        if (row <= 5 && col <= 5) return "red";
+        if (row <= 5 && col >= 9) return "green";
+        if (row >= 9 && col >= 9) return "yellow";
+        if (row >= 9 && col <= 5) return "blue";
+        return null;
+      }
+
+      function isCenterArm(row, col) {
+        const arms = new Set([
+          keyOf(6, 7),
+          keyOf(7, 6),
+          keyOf(7, 8),
+          keyOf(8, 7),
+        ]);
+        return arms.has(keyOf(row, col));
+      }
+
+      function placementsFor(cellId) {
+        return currentState.placements?.[cellId] || [];
+      }
+
+      function buildTokens(tokens) {
+        if (!tokens.length) {
+          return "";
+        }
+
+        const stackClass = `token-stack count-${Math.min(tokens.length, 4)}`;
+        const buttons = tokens
+          .map((token) => {
+            const title = `${token.player_name} | ${token.color.toUpperCase()} ${token.label}`;
+            const clickable = token.movable ? `data-token-id="${escapeHtml(token.id)}"` : "";
+            const disabled = token.movable ? "" : "disabled";
+            const classes = ["token", token.color];
+            if (token.movable) classes.push("movable");
+            if (token.last_moved) classes.push("last-moved");
+            return `
+              <button type="button" class="${classes.join(" ")}" title="${escapeHtml(title)}" ${clickable} ${disabled}>
+                ${escapeHtml(token.label)}
+              </button>
+            `;
+          })
+          .join("");
+
+        return `<div class="${stackClass}">${buttons}</div>`;
+      }
+
+      function cellMarkup(row, col) {
+        const coordKey = keyOf(row, col);
+        const classes = ["cell"];
+        let cellId = null;
+        let content = "";
+
+        if (trackLookup.has(coordKey)) {
+          const trackIndex = trackLookup.get(coordKey);
+          classes.push("track");
+          cellId = `track-${trackIndex}`;
+          if (SAFE_TRACK_INDICES.has(trackIndex)) {
+            classes.push("safe");
+          }
+
+          Object.entries(START_TRACK_INDEX).forEach(([color, index]) => {
+            if (trackIndex === index) {
+              classes.push("start", color);
+            }
+          });
+
+          Object.entries(ENTRY_TRACK_INDEX).forEach(([color, index]) => {
+            if (trackIndex === index) {
+              classes.push("entry", color);
+            }
+          });
+        } else if (laneLookup.has(coordKey)) {
+          const lane = laneLookup.get(coordKey);
+          classes.push("lane", lane.color);
+          cellId = `lane-${lane.color}-${lane.index}`;
+        } else if (yardLookup.has(coordKey)) {
+          const yard = yardLookup.get(coordKey);
+          classes.push("yard-slot");
+          cellId = `yard-${yard.color}-${yard.index}`;
+        } else if (finishLookup.has(coordKey)) {
+          const color = finishLookup.get(coordKey);
+          classes.push("finish", color);
+          cellId = `finish-${color}`;
+        } else if (coordKey === keyOf(7, 7)) {
+          classes.push("center-core");
+          content = '<span class="center-mark">HOME</span>';
+        } else if (isCenterArm(row, col)) {
+          classes.push("center-arm");
+        } else {
+          const color = cornerColor(row, col);
+          if (color) {
+            classes.push("home", color);
+            if (!currentState.active_colors.includes(color)) {
+              classes.push("inactive");
+            }
+          } else if (row >= 6 && row <= 8 || col >= 6 && col <= 8) {
+            classes.push("avenue");
+          } else {
+            classes.push("blank");
+          }
+        }
+
+        if (cellId) {
+          content = buildTokens(placementsFor(cellId));
+        }
+
+        return `<div class="${classes.join(" ")}">${content}</div>`;
+      }
+
+      function buildGrid() {
+        const cells = [];
+        for (let row = 0; row < 15; row += 1) {
+          for (let col = 0; col < 15; col += 1) {
+            cells.push(cellMarkup(row, col));
+          }
+        }
+        return cells.join("");
+      }
+
+      function buildHomeTags() {
+        const activeColors = new Set(currentState.active_colors || []);
+        const names = currentState.player_names || {};
+        const currentColor = currentState.current_color || "";
+
+        return ["red", "green", "yellow", "blue"]
+          .map((color) => {
+            const classes = ["home-tag", color];
+            if (!activeColors.has(color)) {
+              classes.push("inactive");
+            }
+            if (currentColor === color) {
+              classes.push("current");
+            }
+
+            const label = names[color] || (activeColors.has(color) ? color.toUpperCase() : "Unused");
+            return `<div class="${classes.join(" ")}">${escapeHtml(label)}</div>`;
+          })
+          .join("");
+      }
+
+      function render() {
+        const app = document.getElementById("app");
+        app.innerHTML = `
+          <div class="stage">
+            <div class="frame">
+              <div class="board-shell">
+                <div class="board-grid">
+                  ${buildGrid()}
+                </div>
+                ${buildHomeTags()}
+              </div>
+            </div>
+          </div>
+        `;
+
+        app.querySelectorAll("[data-token-id]").forEach((button) => {
+          button.addEventListener("click", () => {
+            emitTokenClick(button.dataset.tokenId);
+          });
+        });
+
+        requestAnimationFrame(setFrameHeight);
+      }
+
+      window.addEventListener("message", (event) => {
+        if (!event.data || event.data.type !== "streamlit:render") {
+          return;
+        }
+
+        const nextState = event.data.args?.board_state || {};
+        currentState.placements = nextState.placements || {};
+        currentState.active_colors = nextState.active_colors || [];
+        currentState.player_names = nextState.player_names || {};
+        currentState.current_color = nextState.current_color || null;
+        render();
+      });
+
+      window.addEventListener("load", () => {
+        setComponentReady();
+        render();
+        setFrameHeight();
+      });
+    </script>
+  </body>
+</html>
