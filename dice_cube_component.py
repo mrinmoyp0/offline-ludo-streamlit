@@ -13,7 +13,7 @@ _DICE_CUBE = components.declare_component("classic_ludo_dice_cube", path=str(_CO
 def render_dice_cube(
     state: dict[str, Any],
     key: str = "classic_ludo_dice_cube",
-    height: int = 230,
+    height: int = 185,
 ) -> None:
     _DICE_CUBE(
         dice_state=state,

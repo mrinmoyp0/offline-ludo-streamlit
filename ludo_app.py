@@ -35,6 +35,15 @@ PAGE_CSS = """
         color: var(--ink);
         font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     }
+    @media (min-width: 980px) {
+        [data-testid="stAppViewContainer"] {
+            overflow: hidden;
+        }
+        .block-container {
+            height: calc(100vh - 0.4rem);
+            overflow: hidden;
+        }
+    }
     header[data-testid="stHeader"],
     div[data-testid="stToolbar"],
     div[data-testid="stDecoration"],
@@ -44,103 +53,106 @@ PAGE_CSS = """
         display: none;
     }
     .block-container {
-        max-width: 1680px;
-        padding-top: 0.55rem;
-        padding-bottom: 0.6rem;
+        max-width: 1540px;
+        padding-top: 0.32rem;
+        padding-bottom: 0.3rem;
     }
     [data-testid="stHorizontalBlock"] {
         align-items: start;
     }
+    [data-testid="stVerticalBlock"] {
+        gap: 0.28rem;
+    }
     .side-card {
         border: 1px solid rgba(46, 36, 26, 0.08);
-        border-radius: 22px;
+        border-radius: 18px;
         background: linear-gradient(180deg, var(--panel-top), var(--panel-bottom));
-        box-shadow: 0 16px 36px var(--shadow);
-        padding: 1rem 1.05rem;
-        margin-bottom: 0.78rem;
+        box-shadow: 0 12px 26px var(--shadow);
+        padding: 0.7rem 0.8rem;
+        margin-bottom: 0.4rem;
     }
     .title-kicker,
     .card-label {
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        font-size: 0.74rem;
+        font-size: 0.66rem;
         color: rgba(64, 47, 31, 0.7);
-        margin-bottom: 0.28rem;
+        margin-bottom: 0.18rem;
     }
     .title-card h1 {
         margin: 0;
-        font-size: clamp(1.95rem, 2.7vw, 2.8rem);
-        line-height: 1.02;
+        font-size: clamp(1.4rem, 2vw, 2rem);
+        line-height: 1.04;
     }
     .title-card p,
     .mini-note {
-        margin: 0.36rem 0 0;
+        margin: 0.2rem 0 0;
         color: rgba(46, 36, 26, 0.72);
-        font-size: 0.95rem;
-        line-height: 1.38;
+        font-size: 0.82rem;
+        line-height: 1.28;
     }
     .status-text {
-        font-size: 1.08rem;
+        font-size: 0.95rem;
         font-weight: 700;
-        line-height: 1.28;
+        line-height: 1.2;
         color: #3f2d1c;
-        margin-bottom: 0.62rem;
+        margin-bottom: 0.38rem;
     }
     .meta-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.55rem;
+        gap: 0.38rem;
     }
     .meta-item {
         border: 1px solid var(--line);
         background: rgba(255, 255, 255, 0.7);
-        border-radius: 15px;
-        padding: 0.6rem 0.72rem;
+        border-radius: 12px;
+        padding: 0.42rem 0.5rem;
     }
     .meta-item span {
         display: block;
-        font-size: 0.72rem;
+        font-size: 0.62rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: rgba(64, 47, 31, 0.6);
-        margin-bottom: 0.16rem;
+        margin-bottom: 0.08rem;
     }
     .meta-item strong {
         display: block;
-        font-size: 0.98rem;
+        font-size: 0.83rem;
     }
     .dice-card {
         text-align: center;
-        border-radius: 20px;
+        border-radius: 14px;
         border: 1px solid var(--line);
         background: rgba(255, 255, 255, 0.64);
-        padding: 0.85rem 0.9rem;
-        margin-bottom: 0.75rem;
+        padding: 0.5rem 0.6rem;
+        margin-bottom: 0.38rem;
     }
     .dice-label {
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        font-size: 0.72rem;
+        font-size: 0.62rem;
         color: rgba(64, 47, 31, 0.64);
     }
     .dice-value {
-        font-size: 2.95rem;
+        font-size: 2.05rem;
         line-height: 1;
         font-weight: 900;
-        margin: 0.34rem 0 0.18rem;
+        margin: 0.2rem 0 0.08rem;
         color: #432d1b;
     }
     .dice-subtext {
-        font-size: 0.9rem;
+        font-size: 0.76rem;
         color: rgba(46, 36, 26, 0.72);
     }
     .notice-card {
-        border-radius: 18px;
-        padding: 0.82rem 0.95rem;
+        border-radius: 14px;
+        padding: 0.56rem 0.68rem;
         border: 1px solid var(--line);
         background: rgba(255, 255, 255, 0.82);
-        box-shadow: 0 12px 24px rgba(88, 60, 32, 0.06);
-        margin-bottom: 0.78rem;
+        box-shadow: 0 8px 18px rgba(88, 60, 32, 0.05);
+        margin-bottom: 0.38rem;
     }
     .notice-card.info { border-left: 5px solid var(--info); }
     .notice-card.success { border-left: 5px solid var(--success); }
@@ -148,20 +160,20 @@ PAGE_CSS = """
     .notice-card.error { border-left: 5px solid var(--error); }
     .notice-card strong {
         display: block;
-        margin-bottom: 0.2rem;
-        font-size: 0.8rem;
+        margin-bottom: 0.12rem;
+        font-size: 0.68rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
         color: rgba(64, 47, 31, 0.74);
     }
     .notice-card p {
         margin: 0;
-        font-size: 0.95rem;
-        line-height: 1.35;
+        font-size: 0.8rem;
+        line-height: 1.24;
     }
     div.stButton > button {
-        min-height: 2.8rem;
-        border-radius: 15px;
+        min-height: 2.28rem;
+        border-radius: 12px;
         font-weight: 700;
         background: linear-gradient(180deg, #fffaf1, #ecd9b8);
         color: #3c2816;
@@ -194,81 +206,137 @@ PAGE_CSS = """
     }
     .section-note {
         border: 1px dashed rgba(74, 52, 29, 0.18);
-        border-radius: 14px;
-        padding: 0.72rem 0.8rem;
+        border-radius: 12px;
+        padding: 0.44rem 0.55rem;
         background: rgba(255, 255, 255, 0.46);
         color: rgba(46, 36, 26, 0.76);
-        font-size: 0.89rem;
-        line-height: 1.35;
-        margin-bottom: 0.75rem;
+        font-size: 0.76rem;
+        line-height: 1.22;
+        margin-bottom: 0.35rem;
     }
-    .player-card {
-        border-radius: 18px;
-        padding: 0.82rem 0.9rem;
-        margin-bottom: 0.58rem;
+    .summary-card {
+        border-radius: 16px;
+        padding: 0.65rem 0.75rem;
+        margin-bottom: 0.38rem;
         border: 1px solid var(--line);
         background: rgba(255, 255, 255, 0.66);
-        box-shadow: 0 12px 22px rgba(88, 60, 32, 0.05);
+        box-shadow: 0 10px 20px rgba(88, 60, 32, 0.05);
     }
-    .player-card.current {
-        box-shadow: 0 0 0 2px rgba(216, 165, 84, 0.26), 0 14px 26px rgba(88, 60, 32, 0.08);
-    }
-    .player-card.red { border-left: 5px solid var(--red); }
-    .player-card.green { border-left: 5px solid var(--green); }
-    .player-card.yellow { border-left: 5px solid var(--yellow); }
-    .player-card.blue { border-left: 5px solid var(--blue); }
-    .player-title {
+    .summary-head {
         display: flex;
         justify-content: space-between;
         gap: 0.8rem;
         align-items: center;
         margin-bottom: 0.35rem;
     }
-    .player-title strong {
-        font-size: 1rem;
+    .summary-head strong {
+        font-size: 0.86rem;
     }
-    .player-title span {
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: rgba(64, 47, 31, 0.66);
+    .summary-head span {
+        font-size: 0.68rem;
+        color: rgba(64, 47, 31, 0.7);
     }
-    .player-metrics {
+    .summary-table {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.45rem;
+        gap: 0.26rem;
+        margin-bottom: 0.42rem;
     }
-    .player-metrics div {
-        border-radius: 12px;
-        padding: 0.48rem 0.55rem;
+    .summary-row {
+        display: grid;
+        grid-template-columns: 0.7rem minmax(0, 1.3fr) repeat(3, minmax(0, 0.62fr)) 2.4rem;
+        gap: 0.28rem;
+        align-items: center;
+        border-radius: 10px;
+        padding: 0.28rem 0.38rem;
         background: rgba(255, 255, 255, 0.74);
         border: 1px solid rgba(74, 52, 29, 0.08);
+        font-size: 0.7rem;
     }
-    .player-metrics span {
-        display: block;
-        font-size: 0.68rem;
+    .summary-row.current {
+        box-shadow: 0 0 0 2px rgba(216, 165, 84, 0.2);
+    }
+    .summary-row.header {
+        background: transparent;
+        border: none;
+        padding: 0 0.15rem 0.1rem;
+        color: rgba(64, 47, 31, 0.6);
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: rgba(64, 47, 31, 0.58);
-        margin-bottom: 0.12rem;
+        font-size: 0.58rem;
     }
-    .player-metrics strong {
-        display: block;
-        font-size: 0.92rem;
+    .swatch {
+        width: 0.7rem;
+        height: 0.7rem;
+        border-radius: 999px;
+    }
+    .swatch.red { background: var(--red); }
+    .swatch.green { background: var(--green); }
+    .swatch.yellow { background: var(--yellow); }
+    .swatch.blue { background: var(--blue); }
+    .who {
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .turn-pill {
+        justify-self: end;
+        border-radius: 999px;
+        padding: 0.16rem 0.34rem;
+        background: rgba(214, 166, 83, 0.18);
+        color: #7d5525;
+        font-size: 0.58rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
     }
     .history-box {
         margin: 0;
-        padding: 0.82rem 0.9rem;
-        border-radius: 16px;
+        padding: 0.55rem 0.65rem;
+        border-radius: 12px;
         background: #221811;
         color: #f4eadb;
         font-family: Consolas, "Courier New", monospace;
-        font-size: 0.86rem;
-        line-height: 1.45;
-        max-height: 232px;
-        overflow-y: auto;
+        font-size: 0.72rem;
+        line-height: 1.28;
         white-space: pre-wrap;
         border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .button-row {
+        display: flex;
+        gap: 0.42rem;
+    }
+    .button-row > div {
+        flex: 1;
+    }
+    .setup-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.26rem 0.42rem;
+    }
+    .input-chip {
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(64, 47, 31, 0.62);
+        margin-bottom: 0.08rem;
+    }
+    div[data-testid="stTextInput"],
+    div[data-testid="stSelectbox"] {
+        margin-bottom: 0.12rem;
+    }
+    div[data-testid="stWidgetLabel"] {
+        margin-bottom: 0.1rem;
+    }
+    div[data-testid="stTextInput"] label p,
+    div[data-testid="stSelectbox"] label p {
+        font-size: 0.68rem;
+    }
+    @media (max-width: 980px) {
+        .block-container {
+            overflow: visible;
+            height: auto;
+        }
     }
 </style>
 """
@@ -366,39 +434,55 @@ def serialize_board_state(game: LudoGame) -> dict[str, object]:
     }
 
 
-def player_card_markup(game: LudoGame, index: int) -> str:
-    player = game.players[index]
-    current_class = " current" if not game.game_over and index == game.current_player_index else ""
-    return f"""
-    <div class="player-card {escape(player.color)}{current_class}">
-        <div class="player-title">
-            <strong>{escape(player.name)}</strong>
-            <span>{escape(COLOR_LABELS[player.color])}</span>
-        </div>
-        <div class="player-metrics">
-            <div>
-                <span>Yard</span>
-                <strong>{player.yard_count}</strong>
-            </div>
-            <div>
-                <span>Board</span>
-                <strong>{player.board_count}</strong>
-            </div>
-            <div>
-                <span>Home</span>
-                <strong>{player.finished_count}</strong>
-            </div>
-        </div>
-    </div>
-    """
-
-
-def history_text(game: LudoGame) -> str:
+def history_text(game: LudoGame, limit: int = 5) -> str:
     if not game.history:
         return "No moves yet."
-    recent = game.history[-10:]
+    recent = game.history[-limit:]
     recent.reverse()
     return "\n".join(f"- {line}" for line in recent)
+
+
+def summary_markup(game: LudoGame) -> str:
+    rows = [
+        """
+        <div class="summary-row header">
+            <div></div>
+            <div>Player</div>
+            <div>Yard</div>
+            <div>Board</div>
+            <div>Home</div>
+            <div></div>
+        </div>
+        """
+    ]
+    for index, player in enumerate(game.players):
+        current = " current" if not game.game_over and index == game.current_player_index else ""
+        turn_badge = "<span class='turn-pill'>Turn</span>" if current else ""
+        rows.append(
+            f"""
+            <div class="summary-row{current}">
+                <div class="swatch {escape(player.color)}"></div>
+                <div class="who">{escape(player.name)}</div>
+                <div>{player.yard_count}</div>
+                <div>{player.board_count}</div>
+                <div>{player.finished_count}</div>
+                <div>{turn_badge}</div>
+            </div>
+            """
+        )
+
+    return f"""
+    <div class="summary-card">
+        <div class="summary-head">
+            <strong>Players</strong>
+            <span>Latest moves below</span>
+        </div>
+        <div class="summary-table">
+            {''.join(rows)}
+        </div>
+        <pre class="history-box">{escape(history_text(game, limit=5))}</pre>
+    </div>
+    """
 
 
 def run_app() -> None:
@@ -408,14 +492,14 @@ def run_app() -> None:
     game: LudoGame = st.session_state.game
     st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-    left_col, right_col = st.columns([1.34, 0.88], gap="large")
+    left_col, right_col = st.columns([1.08, 0.92], gap="medium")
     board_event: dict[str, object] | None = None
 
     with left_col:
         board_event = render_ludo_board(
             serialize_board_state(game),
             key="classic_ludo_board",
-            height=840,
+            height=700,
         )
 
     if board_event is not None:
@@ -435,7 +519,7 @@ def run_app() -> None:
             <div class="side-card title-card">
                 <div class="title-kicker">Offline Local Multiplayer</div>
                 <h1>Classic Ludo</h1>
-                <p>This build keeps the board on the left and moves all titles, status, setup, and match details into the right-hand control rail.</p>
+                <p>Everything you need stays visible on this screen while the board remains square on the left.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -475,7 +559,7 @@ def run_app() -> None:
             f"""
             <div class="side-card">
                 <div class="dice-card">
-                    <div class="dice-label">Latest Die</div>
+                    <div class="dice-label">Dice</div>
                     <div class="dice-value">{escape(str(last_roll_display if last_roll_display is not None else '--'))}</div>
                     <div class="dice-subtext">{escape('Waiting for a token move.' if game.active_roll is not None else 'Ready for the next roll.')}</div>
                 </div>
@@ -489,29 +573,32 @@ def run_app() -> None:
                 "roll_nonce": int(st.session_state.roll_nonce),
             },
             key="classic_ludo_dice",
-            height=230,
+            height=185,
         )
 
-        if st.button("Roll Dice", type="primary", use_container_width=True, disabled=game.game_over or game.active_roll is not None):
-            success, message = game.roll_dice()
-            set_notice("success" if success else "warning", message)
-            if success:
-                st.session_state.roll_nonce += 1
-            st.rerun()
+        roll_col, new_col = st.columns(2, gap="small")
+        with roll_col:
+            if st.button("Roll Dice", type="primary", use_container_width=True, disabled=game.game_over or game.active_roll is not None):
+                success, message = game.roll_dice()
+                set_notice("success" if success else "warning", message)
+                if success:
+                    st.session_state.roll_nonce += 1
+                st.rerun()
 
-        if st.button("Start New Match", use_container_width=True):
-            st.session_state.game = build_game_from_setup()
-            st.session_state.last_board_event_id = None
-            st.session_state.roll_nonce = 0
-            set_notice("info", "Fresh match ready. Roll to start the opening turn.")
-            st.rerun()
+        with new_col:
+            if st.button("New Match", use_container_width=True):
+                st.session_state.game = build_game_from_setup()
+                st.session_state.last_board_event_id = None
+                st.session_state.roll_nonce = 0
+                set_notice("info", "Fresh match ready. Roll to start the opening turn.")
+                st.rerun()
 
         st.markdown(
             """
             <div class="side-card">
                 <div class="card-label">Match Setup</div>
                 <div class="mini-note" style="margin:0;">
-                    Change the player count or names here, then start a fresh standalone match.
+                    Change player count or names here, then apply the setup to a fresh match.
                 </div>
             </div>
             """,
@@ -519,50 +606,26 @@ def run_app() -> None:
         )
         st.markdown(f"<div class='section-note'>{escape(mode_caption(st.session_state.player_count))}</div>", unsafe_allow_html=True)
         st.selectbox("Players", [2, 3, 4], key="player_count", format_func=lambda value: f"{value} players")
-        for color in COLORS_BY_COUNT[st.session_state.player_count]:
-            st.text_input(f"{COLOR_LABELS[color]} player", key=f"setup_name_{color}")
+        input_cols = st.columns(2, gap="small")
+        active_colors = COLORS_BY_COUNT[st.session_state.player_count]
+        for index, color in enumerate(active_colors):
+            with input_cols[index % 2]:
+                st.text_input(f"{COLOR_LABELS[color]} player", key=f"setup_name_{color}")
         if st.button("Apply Setup To New Match", use_container_width=True):
             st.session_state.game = build_game_from_setup()
             st.session_state.last_board_event_id = None
             st.session_state.roll_nonce = 0
             set_notice("info", f"Started a new {st.session_state.player_count}-player match.")
             st.rerun()
-
         st.markdown(
             """
-            <div class="side-card">
-                <div class="card-label">Quick Rules</div>
-                <div class="mini-note" style="margin:0;">
-                    Roll a 6 to leave the yard. Exact rolls are required to reach home. Capturing an opponent outside a safe square sends that token back to its yard. A 6, a capture, or reaching home grants another roll.
-                </div>
+            <div class="section-note">
+                Roll a 6 to leave the yard. Exact rolls are required to reach home. Captures and finishes grant another roll.
             </div>
             """,
             unsafe_allow_html=True,
         )
-
-        st.markdown(
-            """
-            <div class="side-card">
-                <div class="card-label">Players</div>
-                <div class="mini-note" style="margin:0;">
-                    Yard counts waiting tokens, board counts active ones, and home counts finished tokens.
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        for index in range(len(game.players)):
-            st.markdown(player_card_markup(game, index), unsafe_allow_html=True)
-
-        st.markdown(
-            f"""
-            <div class="side-card">
-                <div class="card-label">Recent Moves</div>
-                <pre class="history-box">{escape(history_text(game))}</pre>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        st.markdown(summary_markup(game), unsafe_allow_html=True)
 
 
 __all__ = ["run_app"]
