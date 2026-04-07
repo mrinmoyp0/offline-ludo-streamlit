@@ -7,7 +7,7 @@ import streamlit as st
 
 from dice_cube_component import render_dice_cube
 from ludo_board_component import render_ludo_board
-from ludo_engine import COLORS_BY_COUNT, COLOR_LABELS, LudoGame
+from ludo_engine import ALL_COLORS, COLORS_BY_COUNT, COLOR_LABELS, LudoGame
 
 
 PAGE_CSS = """
@@ -346,16 +346,14 @@ def ensure_state() -> None:
     if "player_count" not in st.session_state:
         st.session_state.player_count = 4
 
-    defaults = {
-        "red": "Player 1",
-        "green": "Player 2",
-        "yellow": "Player 3",
-        "blue": "Player 4",
-    }
-    for color, default_name in defaults.items():
-        key = f"setup_name_{color}"
-        if key not in st.session_state:
-            st.session_state[key] = default_name
+    default_colors = COLORS_BY_COUNT[4]
+    for index, color in enumerate(default_colors):
+        color_key = f"setup_player_color_{index}"
+        name_key = f"setup_player_name_{index}"
+        if color_key not in st.session_state:
+            st.session_state[color_key] = color
+        if name_key not in st.session_state:
+            st.session_state[name_key] = f"Player {index + 1}"
 
     if "game" not in st.session_state:
         st.session_state.game = build_game_from_setup()
@@ -370,13 +368,38 @@ def ensure_state() -> None:
         )
 
 
-def build_game_from_setup() -> LudoGame:
-    colors = COLORS_BY_COUNT[st.session_state.player_count]
+def setup_players() -> tuple[list[str], list[str], str | None]:
+    player_count = int(st.session_state.player_count)
+    colors: list[str] = []
     names: list[str] = []
-    for index, color in enumerate(colors):
-        raw_name = str(st.session_state.get(f"setup_name_{color}", "")).strip()
-        names.append(raw_name or f"Player {index + 1}")
-    return LudoGame.new_game(player_count=st.session_state.player_count, player_names=names)
+    for index in range(player_count):
+        color = str(st.session_state.get(f"setup_player_color_{index}", "")).strip().lower()
+        name = str(st.session_state.get(f"setup_player_name_{index}", "")).strip()
+        colors.append(color)
+        names.append(name or f"Player {index + 1}")
+
+    if any(color not in ALL_COLORS for color in colors):
+        return colors, names, "Choose a valid color for each player."
+    if len(set(colors)) != len(colors):
+        return colors, names, "Each player needs a different color."
+    return colors, names, None
+
+
+def build_game_from_setup() -> LudoGame:
+    colors, names, setup_error = setup_players()
+    if setup_error is not None:
+        fallback_colors = list(COLORS_BY_COUNT[st.session_state.player_count])
+        fallback_names = [f"Player {index + 1}" for index in range(st.session_state.player_count)]
+        return LudoGame.new_game(
+            player_count=st.session_state.player_count,
+            player_names=fallback_names,
+            player_colors=fallback_colors,
+        )
+    return LudoGame.new_game(
+        player_count=st.session_state.player_count,
+        player_names=names,
+        player_colors=colors,
+    )
 
 
 def set_notice(level: str, message: str) -> None:
@@ -385,10 +408,10 @@ def set_notice(level: str, message: str) -> None:
 
 def mode_caption(player_count: int) -> str:
     if player_count == 2:
-        return "Two-player mode uses Red and Yellow on opposite corners."
+        return "Pick any two colors for a head-to-head game."
     if player_count == 3:
-        return "Three-player mode uses Red, Green, and Yellow."
-    return "Four-player mode uses all four colors."
+        return "Pick any three colors for a three-player game."
+    return "All four colors are active in four-player mode."
 
 
 def notice_markup(level: str, message: str) -> str:
@@ -587,10 +610,18 @@ def run_app() -> None:
 
         with new_col:
             if st.button("New Match", use_container_width=True):
-                st.session_state.game = build_game_from_setup()
-                st.session_state.last_board_event_id = None
-                st.session_state.roll_nonce = 0
-                set_notice("info", "Fresh match ready. Roll to start the opening turn.")
+                colors, names, setup_error = setup_players()
+                if setup_error is not None:
+                    set_notice("warning", setup_error)
+                else:
+                    st.session_state.game = LudoGame.new_game(
+                        player_count=st.session_state.player_count,
+                        player_names=names,
+                        player_colors=colors,
+                    )
+                    st.session_state.last_board_event_id = None
+                    st.session_state.roll_nonce = 0
+                    set_notice("info", "Fresh match ready. Roll to start the opening turn.")
                 st.rerun()
 
         st.markdown(
@@ -606,16 +637,36 @@ def run_app() -> None:
         )
         st.markdown(f"<div class='section-note'>{escape(mode_caption(st.session_state.player_count))}</div>", unsafe_allow_html=True)
         st.selectbox("Players", [2, 3, 4], key="player_count", format_func=lambda value: f"{value} players")
-        input_cols = st.columns(2, gap="small")
-        active_colors = COLORS_BY_COUNT[st.session_state.player_count]
-        for index, color in enumerate(active_colors):
-            with input_cols[index % 2]:
-                st.text_input(f"{COLOR_LABELS[color]} player", key=f"setup_name_{color}")
+        for index in range(int(st.session_state.player_count)):
+            name_col, color_col = st.columns([1.5, 1], gap="small")
+            with name_col:
+                st.text_input(f"Player {index + 1} name", key=f"setup_player_name_{index}")
+            with color_col:
+                st.selectbox(
+                    f"Player {index + 1} color",
+                    options=list(ALL_COLORS),
+                    key=f"setup_player_color_{index}",
+                    format_func=lambda value: COLOR_LABELS[str(value)],
+                )
+        colors, _, setup_error = setup_players()
+        if setup_error is None:
+            chosen_labels = ", ".join(COLOR_LABELS[color] for color in colors)
+            st.markdown(f"<div class='section-note'>Selected colors: {escape(chosen_labels)}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div class='section-note'>{escape(setup_error)}</div>", unsafe_allow_html=True)
         if st.button("Apply Setup To New Match", use_container_width=True):
-            st.session_state.game = build_game_from_setup()
-            st.session_state.last_board_event_id = None
-            st.session_state.roll_nonce = 0
-            set_notice("info", f"Started a new {st.session_state.player_count}-player match.")
+            colors, names, setup_error = setup_players()
+            if setup_error is not None:
+                set_notice("warning", setup_error)
+            else:
+                st.session_state.game = LudoGame.new_game(
+                    player_count=st.session_state.player_count,
+                    player_names=names,
+                    player_colors=colors,
+                )
+                st.session_state.last_board_event_id = None
+                st.session_state.roll_nonce = 0
+                set_notice("info", f"Started a new {st.session_state.player_count}-player match.")
             st.rerun()
         st.markdown(
             """

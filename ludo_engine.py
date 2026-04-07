@@ -9,6 +9,7 @@ COLORS_BY_COUNT: dict[int, tuple[str, ...]] = {
     3: ("red", "green", "yellow"),
     4: ("red", "green", "yellow", "blue"),
 }
+ALL_COLORS: tuple[str, ...] = ("red", "green", "yellow", "blue")
 
 COLOR_LABELS: dict[str, str] = {
     "red": "Red",
@@ -91,10 +92,22 @@ class LudoGame:
     last_move: LastMove | None = None
 
     @classmethod
-    def new_game(cls, player_count: int = 4, player_names: list[str] | None = None) -> "LudoGame":
-        colors = COLORS_BY_COUNT.get(player_count)
-        if colors is None:
+    def new_game(
+        cls,
+        player_count: int = 4,
+        player_names: list[str] | None = None,
+        player_colors: list[str] | None = None,
+    ) -> "LudoGame":
+        if player_count not in COLORS_BY_COUNT:
             raise ValueError("Ludo supports only 2, 3, or 4 players.")
+
+        colors = tuple(player_colors or COLORS_BY_COUNT[player_count])
+        if len(colors) != player_count:
+            raise ValueError("The number of selected colors must match the player count.")
+        if any(color not in ALL_COLORS for color in colors):
+            raise ValueError("Unsupported player color selected.")
+        if len(set(colors)) != len(colors):
+            raise ValueError("Each player color must be unique.")
 
         provided_names = list(player_names or [])
         players: list[PlayerState] = []
@@ -172,7 +185,7 @@ class LudoGame:
         self.active_roll = roll
         legal_moves = self.legal_moves()
         if legal_moves:
-            self.status = f"{player.name} rolled {roll}. Click one of the glowing tokens."
+            self.status = f"{player.name} rolled {roll}. Click one of the highlighted tokens on the board."
             return True, self.status
 
         self.active_roll = None
@@ -222,7 +235,9 @@ class LudoGame:
         if option.spawns:
             message_parts.append("The token leaves the yard.")
         if captured_ids:
-            message_parts.append(f"Captured {len(captured_ids)} opposing token{'s' if len(captured_ids) != 1 else ''}.")
+            captured_count = len(captured_ids)
+            suffix = "s" if captured_count != 1 else ""
+            message_parts.append(f"Captured {captured_count} opposing token{suffix}.")
         if finished:
             message_parts.append("That token reached home.")
 
