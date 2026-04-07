@@ -5,6 +5,7 @@ from html import escape
 
 import streamlit as st
 
+from dice_cube_component import render_dice_cube
 from ludo_board_component import render_ludo_board
 from ludo_engine import COLORS_BY_COUNT, COLOR_LABELS, LudoGame
 
@@ -292,6 +293,8 @@ def ensure_state() -> None:
         st.session_state.game = build_game_from_setup()
     if "last_board_event_id" not in st.session_state:
         st.session_state.last_board_event_id = None
+    if "roll_nonce" not in st.session_state:
+        st.session_state.roll_nonce = 0
     if "notice" not in st.session_state:
         st.session_state.notice = (
             "info",
@@ -480,15 +483,26 @@ def run_app() -> None:
             """,
             unsafe_allow_html=True,
         )
+        render_dice_cube(
+            {
+                "value": int(last_roll_display or 1),
+                "roll_nonce": int(st.session_state.roll_nonce),
+            },
+            key="classic_ludo_dice",
+            height=230,
+        )
 
         if st.button("Roll Dice", type="primary", use_container_width=True, disabled=game.game_over or game.active_roll is not None):
             success, message = game.roll_dice()
             set_notice("success" if success else "warning", message)
+            if success:
+                st.session_state.roll_nonce += 1
             st.rerun()
 
         if st.button("Start New Match", use_container_width=True):
             st.session_state.game = build_game_from_setup()
             st.session_state.last_board_event_id = None
+            st.session_state.roll_nonce = 0
             set_notice("info", "Fresh match ready. Roll to start the opening turn.")
             st.rerun()
 
@@ -510,6 +524,7 @@ def run_app() -> None:
         if st.button("Apply Setup To New Match", use_container_width=True):
             st.session_state.game = build_game_from_setup()
             st.session_state.last_board_event_id = None
+            st.session_state.roll_nonce = 0
             set_notice("info", f"Started a new {st.session_state.player_count}-player match.")
             st.rerun()
 

@@ -7,13 +7,13 @@ import streamlit.components.v1 as components
 
 
 _COMPONENT_PATH = Path(__file__).parent / "components" / "ludo_board"
-_LUDO_BOARD = components.declare_component("offline_ludo_board", path=str(_COMPONENT_PATH))
+_LUDO_BOARD = components.declare_component("classic_offline_ludo_board", path=str(_COMPONENT_PATH))
 
 
 def render_ludo_board(
     state: dict[str, Any],
-    key: str = "offline_ludo_board",
-    height: int = 760,
+    key: str = "classic_offline_ludo_board",
+    height: int = 820,
 ) -> dict[str, Any] | None:
     return _LUDO_BOARD(
         board_state=state,
