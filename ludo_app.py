@@ -86,17 +86,17 @@ PAGE_CSS = """
     }
     .title-card p,
     .mini-note {
-        margin: 0.2rem 0 0;
+        margin: 0.14rem 0 0;
         color: rgba(46, 36, 26, 0.72);
-        font-size: 0.82rem;
-        line-height: 1.28;
+        font-size: 0.76rem;
+        line-height: 1.18;
     }
     .status-text {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         font-weight: 700;
         line-height: 1.2;
         color: #3f2d1c;
-        margin-bottom: 0.38rem;
+        margin-bottom: 0.28rem;
     }
     .meta-grid {
         display: grid;
@@ -126,8 +126,8 @@ PAGE_CSS = """
         border-radius: 14px;
         border: 1px solid var(--line);
         background: rgba(255, 255, 255, 0.64);
-        padding: 0.5rem 0.6rem;
-        margin-bottom: 0.38rem;
+        padding: 0.38rem 0.48rem;
+        margin-bottom: 0.24rem;
     }
     .dice-label {
         text-transform: uppercase;
@@ -136,14 +136,14 @@ PAGE_CSS = """
         color: rgba(64, 47, 31, 0.64);
     }
     .dice-value {
-        font-size: 2.05rem;
+        font-size: 1.72rem;
         line-height: 1;
         font-weight: 900;
-        margin: 0.2rem 0 0.08rem;
+        margin: 0.12rem 0 0.04rem;
         color: #432d1b;
     }
     .dice-subtext {
-        font-size: 0.76rem;
+        font-size: 0.68rem;
         color: rgba(46, 36, 26, 0.72);
     }
     .notice-card {
@@ -216,7 +216,7 @@ PAGE_CSS = """
     }
     .summary-card {
         border-radius: 16px;
-        padding: 0.65rem 0.75rem;
+        padding: 0.52rem 0.62rem;
         margin-bottom: 0.38rem;
         border: 1px solid var(--line);
         background: rgba(255, 255, 255, 0.66);
@@ -230,10 +230,10 @@ PAGE_CSS = """
         margin-bottom: 0.35rem;
     }
     .summary-head strong {
-        font-size: 0.86rem;
+        font-size: 0.78rem;
     }
     .summary-head span {
-        font-size: 0.68rem;
+        font-size: 0.62rem;
         color: rgba(64, 47, 31, 0.7);
     }
     .summary-table {
@@ -250,7 +250,7 @@ PAGE_CSS = """
         padding: 0.28rem 0.38rem;
         background: rgba(255, 255, 255, 0.74);
         border: 1px solid rgba(74, 52, 29, 0.08);
-        font-size: 0.7rem;
+        font-size: 0.66rem;
     }
     .summary-row.current {
         box-shadow: 0 0 0 2px rgba(216, 165, 84, 0.2);
@@ -292,13 +292,13 @@ PAGE_CSS = """
     }
     .history-box {
         margin: 0;
-        padding: 0.55rem 0.65rem;
+        padding: 0.46rem 0.56rem;
         border-radius: 12px;
         background: #221811;
         color: #f4eadb;
         font-family: Consolas, "Courier New", monospace;
-        font-size: 0.72rem;
-        line-height: 1.28;
+        font-size: 0.66rem;
+        line-height: 1.18;
         white-space: pre-wrap;
         border: 1px solid rgba(255, 255, 255, 0.06);
     }
@@ -515,14 +515,14 @@ def run_app() -> None:
     game: LudoGame = st.session_state.game
     st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-    left_col, right_col = st.columns([1.08, 0.92], gap="medium")
+    left_col, right_col = st.columns([1.04, 0.96], gap="medium")
     board_event: dict[str, object] | None = None
 
     with left_col:
         board_event = render_ludo_board(
             serialize_board_state(game),
             key="classic_ludo_board",
-            height=700,
+            height=650,
         )
 
     if board_event is not None:
@@ -542,11 +542,75 @@ def run_app() -> None:
             <div class="side-card title-card">
                 <div class="title-kicker">Offline Local Multiplayer</div>
                 <h1>Classic Ludo</h1>
-                <p>Everything you need stays visible on this screen while the board remains square on the left.</p>
+                <p>Player setup now sits above the dice so the board and controls are easier to see together.</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
+
+        st.markdown(
+            """
+            <div class="side-card">
+                <div class="card-label">Match Setup</div>
+                <div class="mini-note" style="margin:0;">
+                    Pick the players, names, and colors first, then start a fresh match with that setup.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown(f"<div class='section-note'>{escape(mode_caption(st.session_state.player_count))}</div>", unsafe_allow_html=True)
+        st.selectbox("Players", [2, 3, 4], key="player_count", format_func=lambda value: f"{value} players")
+        for index in range(int(st.session_state.player_count)):
+            name_col, color_col = st.columns([1.5, 1], gap="small")
+            with name_col:
+                st.text_input(f"Player {index + 1} name", key=f"setup_player_name_{index}")
+            with color_col:
+                st.selectbox(
+                    f"Player {index + 1} color",
+                    options=list(ALL_COLORS),
+                    key=f"setup_player_color_{index}",
+                    format_func=lambda value: COLOR_LABELS[str(value)],
+                )
+        colors, names, setup_error = setup_players()
+        if setup_error is None:
+            chosen_labels = ", ".join(COLOR_LABELS[color] for color in colors)
+            st.markdown(f"<div class='section-note'>Selected colors: {escape(chosen_labels)}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div class='section-note'>{escape(setup_error)}</div>", unsafe_allow_html=True)
+
+        setup_col, restart_col = st.columns(2, gap="small")
+        with setup_col:
+            if st.button("Apply Setup", use_container_width=True):
+                colors, names, setup_error = setup_players()
+                if setup_error is not None:
+                    set_notice("warning", setup_error)
+                else:
+                    st.session_state.game = LudoGame.new_game(
+                        player_count=st.session_state.player_count,
+                        player_names=names,
+                        player_colors=colors,
+                    )
+                    st.session_state.last_board_event_id = None
+                    st.session_state.roll_nonce = 0
+                    set_notice("info", f"Started a new {st.session_state.player_count}-player match.")
+                st.rerun()
+
+        with restart_col:
+            if st.button("New Match", use_container_width=True):
+                colors, names, setup_error = setup_players()
+                if setup_error is not None:
+                    set_notice("warning", setup_error)
+                else:
+                    st.session_state.game = LudoGame.new_game(
+                        player_count=st.session_state.player_count,
+                        player_names=names,
+                        player_colors=colors,
+                    )
+                    st.session_state.last_board_event_id = None
+                    st.session_state.roll_nonce = 0
+                    set_notice("info", "Fresh match ready. Roll to start the opening turn.")
+                st.rerun()
 
         st.markdown(
             f"""
@@ -596,77 +660,14 @@ def run_app() -> None:
                 "roll_nonce": int(st.session_state.roll_nonce),
             },
             key="classic_ludo_dice",
-            height=185,
+            height=155,
         )
 
-        roll_col, new_col = st.columns(2, gap="small")
-        with roll_col:
-            if st.button("Roll Dice", type="primary", use_container_width=True, disabled=game.game_over or game.active_roll is not None):
-                success, message = game.roll_dice()
-                set_notice("success" if success else "warning", message)
-                if success:
-                    st.session_state.roll_nonce += 1
-                st.rerun()
-
-        with new_col:
-            if st.button("New Match", use_container_width=True):
-                colors, names, setup_error = setup_players()
-                if setup_error is not None:
-                    set_notice("warning", setup_error)
-                else:
-                    st.session_state.game = LudoGame.new_game(
-                        player_count=st.session_state.player_count,
-                        player_names=names,
-                        player_colors=colors,
-                    )
-                    st.session_state.last_board_event_id = None
-                    st.session_state.roll_nonce = 0
-                    set_notice("info", "Fresh match ready. Roll to start the opening turn.")
-                st.rerun()
-
-        st.markdown(
-            """
-            <div class="side-card">
-                <div class="card-label">Match Setup</div>
-                <div class="mini-note" style="margin:0;">
-                    Change player count or names here, then apply the setup to a fresh match.
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown(f"<div class='section-note'>{escape(mode_caption(st.session_state.player_count))}</div>", unsafe_allow_html=True)
-        st.selectbox("Players", [2, 3, 4], key="player_count", format_func=lambda value: f"{value} players")
-        for index in range(int(st.session_state.player_count)):
-            name_col, color_col = st.columns([1.5, 1], gap="small")
-            with name_col:
-                st.text_input(f"Player {index + 1} name", key=f"setup_player_name_{index}")
-            with color_col:
-                st.selectbox(
-                    f"Player {index + 1} color",
-                    options=list(ALL_COLORS),
-                    key=f"setup_player_color_{index}",
-                    format_func=lambda value: COLOR_LABELS[str(value)],
-                )
-        colors, _, setup_error = setup_players()
-        if setup_error is None:
-            chosen_labels = ", ".join(COLOR_LABELS[color] for color in colors)
-            st.markdown(f"<div class='section-note'>Selected colors: {escape(chosen_labels)}</div>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<div class='section-note'>{escape(setup_error)}</div>", unsafe_allow_html=True)
-        if st.button("Apply Setup To New Match", use_container_width=True):
-            colors, names, setup_error = setup_players()
-            if setup_error is not None:
-                set_notice("warning", setup_error)
-            else:
-                st.session_state.game = LudoGame.new_game(
-                    player_count=st.session_state.player_count,
-                    player_names=names,
-                    player_colors=colors,
-                )
-                st.session_state.last_board_event_id = None
-                st.session_state.roll_nonce = 0
-                set_notice("info", f"Started a new {st.session_state.player_count}-player match.")
+        if st.button("Roll Dice", type="primary", use_container_width=True, disabled=game.game_over or game.active_roll is not None):
+            success, message = game.roll_dice()
+            set_notice("success" if success else "warning", message)
+            if success:
+                st.session_state.roll_nonce += 1
             st.rerun()
         st.markdown(
             """
