@@ -43,11 +43,17 @@ PAGE_CSS = """
             height: calc(100vh - 0.4rem);
             overflow: hidden;
         }
+        div[data-testid="column"]:has(.left-panel-anchor) {
+            height: calc(100vh - 0.8rem);
+            padding-right: 0.95rem;
+            border-right: 1px solid rgba(94, 66, 36, 0.18);
+        }
         div[data-testid="column"]:has(.right-panel-anchor) {
             height: calc(100vh - 0.8rem);
             overflow-y: auto;
             overflow-x: hidden;
-            padding-right: 0.3rem;
+            padding-left: 0.95rem;
+            padding-right: 0.35rem;
             scrollbar-gutter: stable;
         }
         div[data-testid="column"]:has(.right-panel-anchor)::-webkit-scrollbar {
@@ -62,6 +68,10 @@ PAGE_CSS = """
             background: rgba(255, 255, 255, 0.26);
             border-radius: 999px;
         }
+    }
+    .left-panel-anchor,
+    .right-panel-anchor {
+        display: none;
     }
     header[data-testid="stHeader"],
     div[data-testid="stToolbar"],
@@ -538,6 +548,7 @@ def run_app() -> None:
     board_event: dict[str, object] | None = None
 
     with left_col:
+        st.markdown('<div class="left-panel-anchor"></div>', unsafe_allow_html=True)
         board_event = render_ludo_board(
             serialize_board_state(game),
             key="classic_ludo_board",
